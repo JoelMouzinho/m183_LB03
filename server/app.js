@@ -9,6 +9,7 @@ app.use(express.json());
 const server = http.createServer(app);
 
 app.use(logRequest);
+app.disable("x-powered-by");
 
 // deliver static files from the client folder like css, js, images
 app.use(express.static("client"));

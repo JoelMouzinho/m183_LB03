@@ -17,3 +17,6 @@
 {"level":"info","message":"[2024-11-13T10:04:02.064Z] POST /api/login from ::ffff:127.0.0.1"}
 {"level":"info","message":"[2024-11-13T10:04:02.406Z] POST /api/login from ::ffff:127.0.0.1"}
 {"level":"info","message":"[2024-11-13T10:04:02.728Z] POST /api/login from ::ffff:127.0.0.1"}
+{"level":"info","message":"[2024-11-13T10:08:28.418Z] GET /login.html from ::ffff:127.0.0.1"}
+{"level":"info","message":"[2024-11-13T10:08:28.469Z] GET /styles.css from ::ffff:127.0.0.1"}
+{"level":"info","message":"[2024-11-13T10:08:28.471Z] GET /scripts/login.js from ::ffff:127.0.0.1"}
