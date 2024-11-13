@@ -34,27 +34,33 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getFeed = async () => {
-    const query = "SELECT * FROM tweets ORDER BY id DESC";
-    const response = await fetch(`/api/feed?q=${query}`);
+    const response = await fetch("/api/feed", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${user.token}`,
+      },
+    });
     const tweets = await response.json();
     const tweetsHTML = tweets.map(generateTweet).join("");
     document.getElementById("feed").innerHTML = tweetsHTML;
   };
 
   const postTweet = async () => {
-    const username = user.username;
-    const timestamp = new Date().toISOString();
     const text = newTweetInput.value;
-    const query = `INSERT INTO tweets (username, timestamp, text) VALUES ('${username}', '${timestamp}', '${text}')`;
-    await fetch("/api/feed", {
+    const response = await fetch("/api/feed", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${user.token}`,
       },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ text }),
     });
-    await getFeed();
-    newTweetInput.value = "";
+    if (response.ok) {
+      await getFeed();
+      newTweetInput.value = "";
+    } else {
+      alert("Fehler beim Posten des Tweets");
+    }
   };
 
   postTweetButton.addEventListener("click", postTweet);
@@ -65,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   logoutButton.addEventListener("click", () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("user", "data", "token");
     window.location.href = "/login.html";
   });
 

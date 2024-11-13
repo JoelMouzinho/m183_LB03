@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (response.status === 429) {
       errorText.innerText = data.error;
-    } else if (data?.username) {
+    } else if (data?.token) {
       localStorage.setItem("user", JSON.stringify(data));
       window.location.href = "/";
     } else {

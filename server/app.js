@@ -1,7 +1,7 @@
 const express = require("express");
 const http = require("http");
 const { initializeAPI } = require("./api");
-const logRequest = require("./logging");
+const { logRequest } = require("./logging");
 
 // Create the express server
 const app = express();
