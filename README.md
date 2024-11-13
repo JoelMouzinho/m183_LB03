@@ -1,27 +1,7 @@
 # A simple NodeJS Webapplication that allows yout to Post Tweets
 
-### Getting Started
-
-1. Clone the repo
-   ```sh
-   git clone https://github.com/SwitzerChees/m183-minitwitter
-   ```
-2. Install NPM packages
-   ```sh
-   yarn install
-   # or
-   npm install
-   ```
-3. Run the app
-   ```sh
-   yarn start
-   # or
-   npm start
-   ```
-4. Open the app in your browser
-   ```sh
-   http://localhost:3000
-   ```
+Die Applikation funktioniert ohne probleme wenn man sie mit dem Debugger startet
+Es kommt aber ein fehler auf wenn man es mit "npm start" oder "yarn start" startet.
 
 ### Test Users
 
