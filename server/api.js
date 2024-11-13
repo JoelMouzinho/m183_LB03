@@ -2,10 +2,25 @@ const { initializeDatabase, queryDB, insertDB } = require("./database");
 const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
 const { verifyToken } = require("./auth");
+const bcrypt = require("bcrypt");
+const CryptoJS = require("crypto-js");
+require('dotenv').config();
+
+const encryptionKey = process.env.ENCRYPTION_KEY
+const SECRET_KEY = "dein_secret_key";
 
 let db;
 
-const SECRET_KEY = "dein_secret_key";
+const encrypt = (text) => {
+  const ciphertext = CryptoJS.AES.encrypt(text, encryptionKey).toString();
+  return ciphertext;
+};
+
+const decrypt = (ciphertext) => {
+  const bytes = CryptoJS.AES.decrypt(ciphertext, encryptionKey);
+  const originalText = bytes.toString(CryptoJS.enc.Utf8);
+  return originalText;
+};
 
 // Rate limiter for login endpoint
 const loginLimiter = rateLimit({
@@ -26,7 +41,13 @@ const initializeAPI = async (app) => {
 const getFeed = async (req, res) => {
   const query = "SELECT * FROM tweets ORDER BY id DESC";
   const tweets = await queryDB(db, query);
-  res.json(tweets);
+
+  const descryptedTweets = tweets.map(tweet => ({
+    ...tweet,
+    text: decrypt(tweet.text),
+  }));
+
+  res.json(descryptedTweets);
 };
 
 const postTweet = async (req, res) => {
@@ -34,7 +55,9 @@ const postTweet = async (req, res) => {
   const username = req.user.username; // Benutzername aus dem Token
   const timestamp = new Date().toISOString();
 
-  const query = `INSERT INTO tweets (username, timestamp, text) VALUES ('${username}', '${timestamp}', '${text}')`;
+  const encryptedText = encrypt(text);
+
+  const query = `INSERT INTO tweets (username, timestamp, text) VALUES ('${username}', '${timestamp}', '${encryptedText}')`;
   await insertDB(db, query);
 
   res.json({ status: "Tweet erfolgreich gepostet" });
@@ -42,21 +65,22 @@ const postTweet = async (req, res) => {
 
 const login = async (req, res) => {
   const { username, password } = req.body;
-  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
-  const user = await queryDB(db, query);
+  const query = `SELECT * FROM users WHERE username = ?`;
+  const user = await queryDB(db, query, [username]);
 
   if (user.length === 1) {
     const userData = user[0];
       // Erstelle ein JWT
-      const token = jwt.sign({ username: userData.username}, SECRET_KEY, {
-        expiresIn: "1h", // Gültigkeit des Tokens für 1 Stunde
-      });
-
-      return res.json({ token });
-    
-  } else {
-    return res.status(401).json({ message: "Benutzer nicht gefunden" });
-  }
+      const match = await bcrypt.compare(password, userData.password);
+      if(match) {
+        const token = jwt.sign({ username: userData.username}, SECRET_KEY, {
+          expiresIn: "1h", // Gültigkeit des Tokens für 1 Stunde
+        });
+        return res.json({ token });
+    } else {
+      return res.status(401).json({ message: "Benutzer nicht gefunden" });
+    }
+      }
 };
 
 module.exports = { initializeAPI };
