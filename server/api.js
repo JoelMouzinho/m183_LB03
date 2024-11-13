@@ -11,6 +11,25 @@ const SECRET_KEY = "dein_secret_key";
 
 let db;
 
+const escapeString = (str) => {
+  if (!str) return "";
+  return str.replace(/['"]/g, "\\$&"); // Escaped einfache und doppelte Anführungszeichen
+};
+
+// Hilfsfunktion zum Escape von HTML-Inhalten
+const escapeHTML = (str) => {
+  return str.replace(/[&<>"']/g, (match) => {
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+    return escapeMap[match];
+  });
+};
+
 const encrypt = (text) => {
   const ciphertext = CryptoJS.AES.encrypt(text, encryptionKey).toString();
   return ciphertext;
@@ -55,9 +74,11 @@ const postTweet = async (req, res) => {
   const username = req.user.username; // Benutzername aus dem Token
   const timestamp = new Date().toISOString();
 
-  const encryptedText = encrypt(text);
+  const escapedText = escapeHTML(text);
+  console.log(escapedText);
+  const encryptedText = encrypt(escapedText);
 
-  const query = `INSERT INTO tweets (username, timestamp, text) VALUES ('${username}', '${timestamp}', '${encryptedText}')`;
+  const query = `INSERT INTO tweets (username, timestamp, text) VALUES ('${escapeString(username)}', '${escapeString(timestamp)}', '${escapeString(encryptedText)}')`;
   await insertDB(db, query);
 
   res.json({ status: "Tweet erfolgreich gepostet" });
