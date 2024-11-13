@@ -15,7 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ username, password }),
     });
     const data = await response.json();
-    if (data?.username) {
+
+    if (response.status === 429) {
+      errorText.innerText = data.error;
+    } else if (data?.username) {
       localStorage.setItem("user", JSON.stringify(data));
       window.location.href = "/";
     } else {

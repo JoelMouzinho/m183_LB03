@@ -1,12 +1,22 @@
 const { initializeDatabase, queryDB, insertDB } = require("./database");
+const rateLimit = require("express-rate-limit");
 
 let db;
+
+// Rate limiter for login endpoint
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 Minuten Zeitfenster
+  max: 5, // Maximale Versuche pro IP
+  handler: (req, res) => {
+    res.status(429).json({ error: "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut." });
+  },
+});
 
 const initializeAPI = async (app) => {
   db = await initializeDatabase();
   app.get("/api/feed", getFeed);
   app.post("/api/feed", postTweet);
-  app.post("/api/login", login);
+  app.post("/api/login", loginLimiter, login);
 };
 
 const getFeed = async (req, res) => {
